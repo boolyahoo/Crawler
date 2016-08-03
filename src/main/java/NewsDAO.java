@@ -57,6 +57,7 @@ public class NewsDAO {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
+        int affectRow = 0;
         try {
             conn = getConnection();
             String query = " select id from news where url = ? ";
@@ -76,13 +77,14 @@ public class NewsDAO {
                 rs.close();
                 ps.close();
                 conn.close();
-                return ps.executeUpdate();
-            } else {
-                return 0;
+                affectRow = ps.executeUpdate();
+                rs.close();
+                ps.close();
+                conn.close();
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            return 0;
         }
+        return affectRow;
     }
 }
