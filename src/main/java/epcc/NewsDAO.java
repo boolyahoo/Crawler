@@ -31,14 +31,14 @@ public class NewsDAO {
             p.setProperty("url", "jdbc:MySQL://localhost:3306/epcc_nlp?useUnicode=true&characterEncoding=UTF-8");
             p.setProperty("password", "xgqadmin");
             p.setProperty("username", "root");
-            p.setProperty("maxActive", "200");
-            p.setProperty("maxIdle", "100");
-            p.setProperty("maxWait", "1000");
+            p.setProperty("maxActive", "1000");
+            p.setProperty("maxIdle", "1000");
+            p.setProperty("maxWait", "2000");
+            p.setProperty("initialSize", "500");
             p.setProperty("removeAbandoned", "false");
-            p.setProperty("removeAbandonedTimeout", "120");
+            p.setProperty("removeAbandonedTimeout", "500");
             p.setProperty("testOnBorrow", "true");
             p.setProperty("logAbandoned", "true");
-            p.setProperty("initialSize", "100");
             dataSrc = (BasicDataSource) BasicDataSourceFactory.createDataSource(p);
         } catch (Exception e) {
             LOG.error("DAO object init fail", e);
@@ -62,28 +62,19 @@ public class NewsDAO {
     public static int insert(News news) {
         Connection conn = null;
         PreparedStatement ps = null;
-        ResultSet rs = null;
         int affectRow = 0;
         try {
             conn = getConnection();
-            String query = " select id from news where url = ? ";
-            ps = conn.prepareStatement(query);
+            // insert
+            String insert = " insert into news(url, title, content, time_stamp) values(?, ?, ?, ?) ";
+            ps = conn.prepareStatement(insert);
             ps.setString(1, news.getUrl());
-            rs = ps.executeQuery();
-            // url不存在则执行插入
-            if (!rs.next()) {
-                // insert
-                String insert = " insert into news(url, title, content, time_stamp) values(?, ?, ?, ?) ";
-                ps = conn.prepareStatement(insert);
-                ps.setString(1, news.getUrl());
-                ps.setString(2, news.getTitle());
-                ps.setString(3, news.getContent());
-                ps.setDate(4, new Date(System.currentTimeMillis()));
-                affectRow = ps.executeUpdate();
-                rs.close();
-                ps.close();
-                conn.close();
-            }
+            ps.setString(2, news.getTitle());
+            ps.setString(3, news.getContent());
+            ps.setDate(4, new Date(System.currentTimeMillis()));
+            affectRow = ps.executeUpdate();
+            ps.close();
+            conn.close();
         } catch (SQLException e) {
             LOG.warn("insert news fail", e);
         }
